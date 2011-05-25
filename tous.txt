@@ -1,0 +1,64 @@
+
+*********************************************
+let Int x = 3 in (let Int y = 5 in (x+y)).//ok
+fun Int x |-> (x+1).
+fun Int y |-> (fun Int x |-> (x+y)).
+fun Int z |-> (fun Int y |-> (fun Int x |-> ((x+y)+z))).//chao
+
+let Int x = 5 in (if((x > 3) and (x<7)) then 3 else 7).
+let Int x =5 in (if(if(true) then true else true)  then 5 else 3).
+let Int x = 5 in (if((x > 3) or (x<7)) then 3 else 7).
+
+
+at x new (recv Int n from y in (print_int n)) in send 1 to x.
+
+at x new (recv Proc prints from y in (prints)) in (let Proc print1 = (print_int 1) in (send (print1 ; print_int 2) to x)).
+
+at x new (print_int 2) in (send (print_int 3) to x).
+
+
+
+***********************************************
+
+GEN
+
+let Int x = 1 in (print_int x).
+
+let Int x = 2+3 in (print_int x).
+
+let Int x = 3 in let Int y = 3+x in (print_int x).
+
+let (Int -> Int) f = fun Int x |-> (x+1) in (print_int (f 0)).          
+
+let Int y = 2 in
+let (Int -> Int) f = fun Int x |-> (x+y) in
+(print_int (f 0)).
+
+let Int x = (print_int 2) in (print_int 3).----------------------false
+
+
+
+
+***********************************************\
+let Int x = ( print_int x; x ) in print_int x.
+
+let Proc p = (print_int 1; p) in p.
+
+let Int x = ( fun Int y |-> ( x ) x ) in print_int x.
+***********************************************
+let Int y = 2 in (let Int x = y in print_int x).
+
+
+let Int y = 2 in let (Int -> Int) f = fun Int x |-> (x+y) in let (Int -> Int) -> (Int -> Int) app = fun (Int -> Int) x |-> fun (Int) y |-> (x y) in (print_int ((app f) 0)).
+
+
+let (Int -> Int) f = fun Int x |-> x+1 in (print_int (f 0))
+***************************************************
+let (Int -> Proc) var = fun Int x |-> ((recv Int i from p in send x to p); (var (x + i))) in
+at px new (var 0) in
+send 1 to px ;
+recv Int x from px in
+(print_int x) ;
+send 2 to px ;
+recv Int x from px in
+(print_int x)

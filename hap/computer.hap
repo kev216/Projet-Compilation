@@ -1,0 +1,4 @@
+
+recv (X->Y) f from c in
+recv X x from c in
+send (f x) to c

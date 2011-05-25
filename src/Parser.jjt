@@ -1,0 +1,192 @@
+//************************************************
+// AUTHOR: Pablo Arrighi (pablo.arrighi@imag.fr)
+// DATE: January 2008
+//************************************************
+
+options {
+  MULTI=true;
+  NODE_DEFAULT_VOID=true;
+  KEEP_LINE_COLUMN=true;
+}
+
+PARSER_BEGIN(Parser)
+
+//************************************************
+// AUTHOR: Pablo Arrighi (pablo.arrighi@imag.fr)
+// DATE: January 2008
+//************************************************
+public class Parser {
+}
+
+PARSER_END(Parser)
+
+SKIP :
+{
+	" " 
+	| "\t" 
+	| "\n" 
+	| "\r" 
+	| < "//" (~["\n"])* "\n" >
+}
+
+
+TOKEN :
+{	
+	<fun: "fun"> | <arrow: "->"> | <mapsto: "|->">
+	| <mif: "if"> | <mthen: "then"> | <melse: "else"> 
+	| <let: "let"> | <in: "in">
+	| <mtrue: "true"> | <mfalse: "false"> | <and: "and"> | <or: "or">
+	| <eq: "=="> | <leq: ("<="|"=<") >  | <geq: (">="|"=>") > | <set: "=">
+	| <mnull: "O" > | <print: "print_int" >
+	| <recv: "recv"> | <from: "from"> 
+	| <send: "send"> | <to: "to">
+	| <at: "at"> | <mnew: "new">
+	| <TYPE:  ("Bool" | "Int" | "Ref" | "Proc")> 
+	| <NUM: (["0"-"9"])+ >
+	| <TERMVAR: ["a"-"z"](["a"-"z","A"-"Z","_","0"-"9"])* >
+	| <TYPEVAR: ["A"-"Z"](["a"-"z","A"-"Z","_","0"-"9"])* >
+}
+
+ASTStart start() 													#Start(1)
+:{}
+{
+	term() (<EOF> | ".")
+	{return jjtThis;}												
+}
+
+void simpleterm() :
+{Token t;}
+{	
+	fun() 
+	| let()	
+	| mif()	
+	| <mtrue> 			{jjtThis.value=true;}						#Bool(0)			
+	| <mfalse> 			{jjtThis.value=false;}						#Bool(0)
+	| "!" simpleterm()												#Not(1)
+	| t=<NUM> 			{jjtThis.value=Integer.parseInt(t.image);}	#Int(0)
+	| "-" simpleterm() 												#Opp(1)
+	| "#" t=<NUM>		{jjtThis.value=Integer.parseInt(t.image);}	#Ref(0)
+	| <mnull> 														#Null(0)
+	| <print> simpleterm()											#Print(1)
+	| recv()
+	| send()
+	| mnew()
+	| termvar() 			
+	| "(" term() ")" 
+}
+
+void term()
+:{int i=1;}
+{
+	simpleterm()
+	[ (<and> simpleterm() {i++;})+									#And(i)
+	| (<or> simpleterm() {i++;})+ 									#Or(i)
+	| "~" simpleterm() 												#Idy(2)
+	| <eq> simpleterm()												#Eq(2)
+	| <leq> simpleterm() 											#Leq(2)
+	| <geq> simpleterm() 											#Geq(2)
+	| "<" simpleterm() 												#Lt(2)
+	| ">" simpleterm()												#Gt(2)
+	| ("+" simpleterm() {i++;})+  									#Add(i)
+	| ("*" simpleterm() {i++;})+  									#Mult(i)
+	| (";" simpleterm() {i++;})+ 									#Seq(i)
+	| term()	  													#App(2)
+	]
+}
+
+void interm() 														#Seq(>1)
+:{}
+{	<in>
+	simpleterm()  
+	(
+	LOOKAHEAD(";")
+	";" simpleterm()
+	)* 																
+}
+
+void termvar()
+:{Token t;}
+{
+	t=<TERMVAR> 			{jjtThis.value=t.image; jjtThis.line=t.beginLine; jjtThis.column=t.beginColumn;}
+																	#TermVar(0)
+}
+
+void fun() 															#Fun(3)
+:{}
+{
+	<fun> type() termvar() (funcont() | funend())				
+}
+
+void funcont()														#Fun(3)
+:{}													
+{
+	"," type() termvar() (funcont() | funend())
+}
+
+void funend()
+:{}
+{
+	<mapsto> simpleterm()
+}
+
+void let() 															#Let(4)
+:{}
+{	
+	 <let> type() termvar() <set> term() interm()
+}
+
+void mif() 															#If(3)
+:{}
+{
+	<mif> term() <mthen> simpleterm() <melse> simpleterm()				
+}
+
+void recv() 														#Recv(4)
+:{}
+{ 
+	<recv> type() termvar() <from> termvar() interm()					
+}
+
+void send() 														#Send(2)
+:{}
+{ 
+	<send> term() <to> simpleterm()									
+}
+
+void mnew() 														#New(3)
+:{}
+{
+	<at> termvar() <mnew> term() interm()						
+}
+
+void type() 														#ArrowType(>1)
+:{}
+{
+	simpletype() (<arrow> simpletype() )?  
+}
+
+void simpletype()
+:{Token t;}
+{
+	"(" type() ")"
+	| t=<TYPE>			{jjtThis.value = t.image;}					#Type(0)
+	| t=<TYPEVAR> 			{jjtThis.value = t.image;}				#TypeVar(0)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

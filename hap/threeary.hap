@@ -1,0 +1,2 @@
+let (Int->(Int->(Int->Int))) threeary = fun Int x, Int y, Int z |-> x+y+z in
+print_int (threeary 1  2  3)

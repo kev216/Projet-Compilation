@@ -1,0 +1,9 @@
+let (Int->Proc) var = fun Int x |-> (recv Int i from px in send x to px ; (var (x+i))) in at px new (var 0) in send 1 to px ; recv Int x from px in (print_int x); send 2 to px ; recv Int x from px in (print_int x).
+
+
+let (Int->Proc) var = fun Int y |-> (var (y+2)) in at px new (var 0) in send 1 to px ; recv Int x from px in (print_int x); send 2 to px ; recv Int x from px in (print_int x).
+
+
+if((3+4 > 12) and (4+x < 13)) then (x+3) else (x+5).
+
+at x new (recv Int n from y in (print_int n)) in send 1 to x.

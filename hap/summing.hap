@@ -1,0 +1,4 @@
+let Int y = 0 in
+let Int z = 1 in
+let Int z = 5 + (if z==0 then y else y+3) in
+print_int x+y.

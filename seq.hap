@@ -1,0 +1,55 @@
+print_int ( ( fun Bool b, Int x |-> (if !b then -1 else x) ) true 3 ); // anonymous function call
+
+let Proc prn = (print_int 10; prn) in prn; // recursive let
+
+let Proc prn = ( let Int x = -1111 in print_int x ) // separator
+in
+  let Proc->Int fx = fun Proc p |-> (prn; 2)
+  in
+  (
+  	print_int (fx prn);
+  	
+	  let Int->Int add = // adds 'n' first numbers
+	   	(
+	   		prn ; // print the separator
+	   		
+		  	fun Int n |-> 
+		  	( 
+		  		print_int n; // debug
+		  		 
+		  		if (n < 1) then
+		  		(
+		  			prn; // print the separator
+		  			0
+		  		) 
+		  		else 
+		  		(
+		  			n + ( add ( n + -1 ) ) // recursive call 
+		  		) 
+		  	)
+		)
+	  in
+	    let Int y = (add 3) // function call
+	    in
+	      let Int x = (print_int y; prn; y) // variable reference
+	      in
+	        print_int ( 
+	        	if ( (print_int (add 5); prn; (add 3)) < (print_int (x + -1); prn; x) ) then // sequences inside conditions 
+	        		21 
+	        	else 
+	        	(
+	        		print_int x ; 
+	        		prn ;
+	        		print_int ( ( let Int add = 18 in add ) + -( let Int add = 2 in add ) ); // same variable 'add'
+	        		print_int ( ( let Bool x = (y == 3) in if x then 1 else 2 ) + x );
+	        			
+	        		let Int->(Int->Int) add = fun Int x, Int y |-> (x+y) // another 'add' occurrence
+	        		in 
+	        		  let Int->Int inc3 = (add 3) 
+	        		  in 
+	        		    let Int->Int inc4 = (add 4) 
+	        		      in prn ; (inc3 (inc4 1))
+	        	) 
+	        ) ;
+	        prn
+  )

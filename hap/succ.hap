@@ -1,0 +1,3 @@
+let Int five = 3+2 in
+let (Int->Int) succ = fun Int x |-> x+1 in
+print_int (succ five)

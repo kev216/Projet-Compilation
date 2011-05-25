@@ -1,0 +1,10 @@
+
+let (Int->Proc) var = fun Int x |-> (recv Int i from p in send x to p ; (var (x+i))) in
+
+at px new (var 0) in
+send 1 to px ;
+recv Int x from px in
+(print_int x);
+send 2 to px ;
+recv Int x from px in
+(print_int x)
